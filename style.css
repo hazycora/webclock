@@ -1,0 +1,129 @@
+@font-face {
+    font-family: 'Oswald';
+    src: url('./assets/Oswald-Regular.woff2') format('woff2'),
+        url('./assets/Oswald-Regular.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+  background-color: #302b3b;
+  font-size: 20;
+  color: #e0daed;
+  font-family: Oswald;
+  margin: 0px;
+  padding: 0px;
+  line-height: 1;
+}
+
+#header {
+  background-color: #211e29;
+  color: #aca7b8;
+  display: inline-block;
+  padding: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
+  margin: 0px;
+  width: calc(100% - 6px);
+  line-height: normal;
+  height: 25px;
+}
+
+#footer {
+  position: fixed;
+  left: 0px;
+  bottom: 0px;
+  background-color: #211e29;
+  color: #aca7b8;
+  display: inline-block;
+  padding: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
+  margin: 0px;
+  width: calc(100% - 6px);
+  line-height: normal;
+  height: 25px;
+  user-select: none;
+}
+
+#content {
+  display: inline-block;
+  color: #aca7b8;
+  padding: 0px;
+  padding-left: 4px;
+  margin: 0px;
+}
+
+.optionLeft {
+  float: left;
+  margin: 0px;
+  padding: 0px;
+  padding-left: 8px;
+  padding-right: 8px;
+  transition: padding-top 0.2s, color 0.2s;
+  user-select: none;
+}
+
+.optionRight {
+  float: right;
+  margin: 0px;
+  padding: 0px;
+  padding-left: 8px;
+  padding-right: 8px;
+  transition: padding-top 0.2s, color 0.2s;
+  user-select: none;
+}
+
+.optionRight:hover {
+  padding-top: 4px;
+  color: white;
+  background-color: #131117;
+}
+
+.optionRight:active {
+  padding-top: 2px;
+  color: #aca7b8;
+}
+
+.optionLeft:hover {
+  padding-top: 4px;
+  color: white;
+  background-color: #131117;
+}
+
+.optionLeft:active {
+  padding-top: 2px;
+  color: #aca7b8;
+}
+
+#toggleHDT {
+  float: left;
+  margin: 0px;
+  padding: 0px;
+  padding-left: 8px;
+  padding-right: 8px;
+  transition: padding-bottom 0.2s, color 0.2s;
+  user-select: none;
+}
+
+#toggleHDT:hover {
+  padding-bottom: 4px;
+  color: white;
+  background-color: #131117;
+}
+
+#toggleHDT:active {
+  padding-bottom: 2px;
+  color: #aca7b8;
+}
+
+#displayTime {
+  padding: 0px;
+  margin: 0px;
+  margin-top: 30px;
+  font-size: 50px;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 0;
+}

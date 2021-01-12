@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>HazyClock</title>
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+  <link rel="stylesheet" href="./style.css">
+  <script type="text/javascript" src="suncalc.js"></script>
+</head>
+<body>
+  <div id="header">
+    <p class="optionLeft" id="option12" onclick="setFormat('12hr')">12hr</p><p class="optionLeft" id="option24" onclick="setFormat('24hr')">24hr</p><p class="optionLeft" id="option100" onclick="setFormat('100')">/100</p><p class="optionRight" id="optionsMenu" onclick="openMenu()">options</p><p class="optionRight" id="copyButton" onclick="copyTextToClipboard()">copy</p>
+  </div>
+  <div id="content">
+    <p id="displayTime">00:00</p>
+  </div>
+  <div id="footer">
+    <p id="toggleHDT" onclick="toggleHDT()">HDT is off</p>
+  </div>
+  <script>
+    let clock = {}
+    clock = { date: "", string12: "", string24: "", hdt: false }
+    let clockFormat = "12hr"
+    if (localStorage.clockFormat != undefined) {
+      clockFormat = localStorage.clockFormat
+
+    }
+    updateTime();
+    setInterval(updateTime, 40);
+
+    function copyTextToClipboard() {
+      var textArea = document.createElement("textarea");
+
+      //
+      // *** This styling is an extra step which is likely not required. ***
+      //
+      // Why is it here? To ensure:
+      // 1. the element is able to have focus and selection.
+      // 2. if the element was to flash render it has minimal visual impact.
+      // 3. less flakyness with selection and copying which **might** occur if
+      //    the textarea element is not visible.
+      //
+      // The likelihood is the element won't even render, not even a
+      // flash, so some of these are just precautions. However in
+      // Internet Explorer the element is visible whilst the popup
+      // box asking the user for permission for the web page to
+      // copy to the clipboard.
+      //
+
+      // Place in the top-left corner of screen regardless of scroll position.
+      textArea.style.position = 'fixed';
+      textArea.style.top = 0;
+      textArea.style.left = 0;
+
+      // Ensure it has a small width and height. Setting to 1px / 1em
+      // doesn't work as this gives a negative w/h on some browsers.
+      textArea.style.width = '2em';
+      textArea.style.height = '2em';
+
+      // We don't need padding, reducing the size if it does flash render.
+      textArea.style.padding = 0;
+
+      // Clean up any borders.
+      textArea.style.border = 'none';
+      textArea.style.outline = 'none';
+      textArea.style.boxShadow = 'none';
+
+      // Avoid flash of the white box if rendered for any reason.
+      textArea.style.background = 'transparent';
+
+
+      textArea.value = document.getElementById("displayTime").innerHTML;
+
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+        console.log('Copying text command was ' + msg);
+      } catch (err) {
+        console.log('Oops, unable to copy');
+      }
+
+      document.body.removeChild(textArea);
+    }
+
+    function getLocation() {
+      hdtWorking = true;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        document.getElementById("toggleHDT").innerHTML = "HDT failed"
+      }
+    }
+
+    function showPosition(position) {
+      sessionStorage.ApproximateLong = position.coords.longitude
+      sessionStorage.ApproximateLat = position.coords.latitude
+    }
+
+    function toggleHDT() {
+      clock.hdt = !clock.hdt
+      if(clock.hdt) {
+        document.getElementById("toggleHDT").innerHTML = "HDT is on"
+      }else{
+        document.getElementById("toggleHDT").innerHTML = "HDT is off"
+      }
+    }
+
+    function setFormat(formatOption) {
+      clockFormat = formatOption
+      localStorage.clockFormat = formatOption
+    }
+
+    function formatAMPM(date) { // from https://stackoverflow.com/a/8888498
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var seconds = date.getSeconds();
+      var ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      hours = hours < 10 ? '0'+hours : hours;
+      minutes = minutes < 10 ? '0'+minutes : minutes;
+      seconds = seconds < 10 ? '0'+seconds : seconds;
+      var strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+      return strTime;
+    }
+
+    function format24hr(date) {
+      let hours = date.getHours()
+      if (hours<10) {
+        hours = "0"+hours
+      }
+      let minutes = date.getMinutes()
+      if (minutes<10) {
+        minutes = "0"+minutes
+      }
+      let seconds = date.getSeconds()
+      if (seconds<10) {
+        seconds = "0"+seconds
+      }
+      let strTime = hours+":"+minutes+":"+seconds
+      return strTime;
+    }
+
+    function format100(date) {
+      let time = ((date.getHours()+(date.getMinutes()+(date.getSeconds()+date.getMilliseconds()/1000)/60)/60)/24)*100
+      let hours = Math.floor(time)
+      if (hours<10) {
+        hours = "0"+hours
+      }
+      let minutes = Math.floor((time-hours)*100)
+      if (minutes<10) {
+        minutes = "0"+minutes
+      }
+      let seconds = Math.floor((((time-hours)*100)-minutes)*100)
+      if (seconds<10) {
+        seconds = "0"+seconds
+      }
+      let strTime = hours+":"+minutes+":"+seconds
+      return strTime;
+    }
+
+    let hdtWorking = true;
+
+    function updateTime() {
+      clock.date = new Date()
+
+      if (clock.hdt&&hdtWorking) {
+        let long = "0"
+        let lat = "0"
+        if((localStorage.Longitude==undefined||localStorage.Longitude=="")&&(localStorage.Latitude==undefined||localStorage.Latitude=="")) {
+          getLocation();
+          if ((sessionStorage.ApproximateLong!=undefined&&sessionStorage.ApproximateLong!="")&&(sessionStorage.ApproximateLat!=undefined&&sessionStorage.ApproximateLat!="")) {
+            long = sessionStorage.ApproximateLong
+            lat = sessionStorage.ApproximateLat
+          }else{
+            document.getElementById("toggleHDT").innerHTML = "Input coordinates in options."
+            hdtWorking = false;
+          }
+        }else{
+          long = localStorage.Longitude
+          lat = localStorage.Latitude
+        }
+        let times = SunCalc.getTimes(new Date(), long, lat);
+        let hdtOffset = 43200000-(((times.solarNoon.getHours()*60+times.solarNoon.getMinutes()-1)*60+times.solarNoon.getSeconds())*1000)
+        clock.date = new Date(clock.date.getTime()+hdtOffset);
+
+      }
+
+      clock.string24 = format24hr(clock.date)
+      clock.string12 = formatAMPM(clock.date)
+      clock.string100 = format100(clock.date)
+      if (clockFormat == "12hr") {
+        document.getElementById("displayTime").innerHTML = clock.string12
+      }
+      if (clockFormat == "24hr") {
+        document.getElementById("displayTime").innerHTML = clock.string24
+      }
+      if (clockFormat == "100") {
+        document.getElementById("displayTime").innerHTML = clock.string100
+      }
+    }
+
+    function openMenu() {
+      window.location.href = "options.html";
+    }
+  </script>
+</body>
+</html>
